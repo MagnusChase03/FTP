@@ -34,13 +34,7 @@ public class FolderGiver {
             //out.flush();
             System.out.println("Sent data.");
 
-            Folder f = (Folder) deserialize(data);
-            BufferedReader r = new BufferedReader(new FileReader(f.files.get(0)));
-            System.out.println(r.readLine());
-            r.close();
-
-
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
 
             e.printStackTrace();
 
