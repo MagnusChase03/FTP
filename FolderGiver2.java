@@ -1,7 +1,5 @@
 import java.io.*;
 import java.net.*;
-import java.util.*;
-import org.apache.commons.lang3.*;
 
 public class FolderGiver2 {
 
@@ -36,7 +34,13 @@ public class FolderGiver2 {
             //out.flush();
             System.out.println("Sent data.");
 
-        } catch (IOException e) {
+            Folder f = (Folder) deserialize(data);
+            BufferedReader r = new BufferedReader(new FileReader(f.files.get(0)));
+            System.out.println(r.readLine());
+            r.close();
+
+
+        } catch (IOException | ClassNotFoundException e) {
 
             e.printStackTrace();
 
@@ -87,22 +91,18 @@ public class FolderGiver2 {
 
     }
 
-    public static void main(String[] args) {
+    private Object deserialize(byte[] ary) throws IOException, ClassNotFoundException {
 
-        new FolderGiver2(8000, "H:\\testFolder");
+        ByteArrayInputStream in = new ByteArrayInputStream(ary);
+        ObjectInputStream objstrm = new ObjectInputStream(in);
+
+        return objstrm.readObject();
 
     }
 
-}
+    public static void main(String[] args) {
 
-class Folder extends File{
-
-    public Folder parent;
-    public ArrayList<File> files = new ArrayList<>();
-
-    public Folder(String filepath){
-
-        super(filepath);
+        new FolderGiver2(8000, "H:\\testFolder");
 
     }
 
