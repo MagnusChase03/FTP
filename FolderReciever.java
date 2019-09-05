@@ -9,7 +9,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+
 
 public class FolderReciever {
 
@@ -18,56 +21,71 @@ public class FolderReciever {
         Socket user = new Socket(host, port);
         //System.out.println(user.getInputStream().available());
         
-        Thread.sleep(1000);
+        //Thread.sleep(1000);
         
         InputStream in = user.getInputStream();
         //System.out.println(in.available());
-        byte[] inBytes = new byte[1024000];
+        byte[] inBytes = new byte[2000000000];
         int index = 0;
         
         while (in.available() > 0) {
         	
         	inBytes[index] = (byte) in.read();
-        	//System.out.println(inBytes[index]);
+        	//System.out.print(inBytes[index]);
         	index++;
         	
         }
         
         Folder folder = (Folder) deserialize(inBytes);
         folder.mkdirs();
-        process(folder);
+        //process(folder);
+        
+        try {
+        	
+        	BufferedReader read = new BufferedReader(new FileReader(folder.files.get(0)));
+        	System.out.println(folder.files.get(0).hashCode());
+        	read.close();
+        	
+        } catch (Exception e) {}
+        
         
         in.close();
         user.close();
 
     }
 	
-	public static void process(Folder fol) throws IOException{
-		
+	public static void process(Folder fol) throws IOException {
+	
 		for(File f : fol.files) {
 			
-			if(f.isDirectory()) {
+			System.out.println(f.getTotalSpace());
+			
+			//System.out.println(f);
+			
+			if(f.getName().indexOf(".") < 0) {
 				
-				//System.out.println("jjkjhgfh");
-				f.mkdir();
+				Files.createDirectories(Paths.get(f.getAbsolutePath()));
 				process((Folder)f);
 				
 			} else {
 				
 				
+				
 				String filename = f.getAbsolutePath();
-				new File(filename).createNewFile();
+				
+				//new File(filename).createNewFile();
 				
 				BufferedReader in = new BufferedReader(new FileReader(f));
 				String line = "";
 				String contents = "";
+				
 				while ((line = in.readLine()) != null) {
 
-					//System.out.println(line);
+					System.out.println(line);
 		            contents += line;
 		            contents += "\n";
 
-		        }
+				}
 		        BufferedWriter write = new BufferedWriter(new FileWriter(f.getAbsoluteFile()));
 		        write.write(contents);
 				
@@ -89,23 +107,11 @@ public class FolderReciever {
 
     public static void main(String[] args) throws Exception {
 
-        new FolderReciever("10.8.5.78", 8000, "H:\\");
+        new FolderReciever("10.8.5.75", 8000, "H:\\");
 
     }
 	
 }
 
-class Folder extends File {
-	
-	
-	public Folder parent;
-	public ArrayList<File> files = new ArrayList<>();
-	
-	public Folder(String filepath) {
-		
-		super(filepath);
-		
-	}
-	
-}
+
 
