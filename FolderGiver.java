@@ -1,38 +1,92 @@
+import java.awt.*;
+import java.awt.event.*;
 import java.io.*;
 import java.net.*;
+import javax.swing.*;
 
-public class FolderGiver {
+public class FolderGiver extends JFrame {
 
-    public FolderGiver(int port, String path) {
+    private Socket user;
+    private ServerSocket server;
+    private JTextArea port;
+    private JTextArea path;
 
-        Socket user;
+    public FolderGiver() {
+
+        createGUI();
+
+    }
+
+    private void createGUI() {
+
+        setTitle("Folder Giver");
+        setSize(720, 330);
+        setResizable(false);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(null);
+        add(panel);
+
+        port = new JTextArea();
+        port.setBounds(250, 50, 200, 30);
+        port.setFont(new Font("monospace", Font.PLAIN, 20));
+        port.setMargin(new Insets(0, 10, 0, 0));
+        port.setText("Port number");
+        panel.add(port);
+
+        path = new JTextArea();
+        path.setBounds(250, 110, 200, 30);
+        path.setFont(new Font("monospace", Font.PLAIN, 20));
+        path.setMargin(new Insets(0, 10, 0, 0));
+        path.setText("Folder path");
+        panel.add(path);
+
+        JButton send = new JButton("Send");
+        send.setBounds(250, 180, 200, 30);
+        send.setFont(new Font("monospace", Font.PLAIN, 20));
+        send.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+
+                createServer();
+                sendData();
+
+            }
+        });
+        panel.add(send);
+
+        setVisible(true);
+
+    }
+
+    private void createServer() {
+
         try {
 
-            ServerSocket host = new ServerSocket(port);
-
-            System.out.println("Accepting...");
-            user = host.accept();
-            System.out.println("Found giving data");
+            server = new ServerSocket(Integer.parseInt(port.getText()));
+            user = server.accept();
 
         } catch (IOException e) {
 
-            System.out.println("Cannot host.");
-            return;
+            e.printStackTrace();
 
         }
 
-        Folder folder = new Folder(path);
+    }
+
+    private void sendData() {
+
+        Folder folder = new Folder(path.getText());
         getFiles(folder);
 
         try {
 
             byte[] data = getBytes(folder);
-            //BufferedOutputStream out = new BufferedOutputStream(user.getOutputStream());
             OutputStream out = user.getOutputStream();
             out.write(data);
             out.close();
-            //out.flush();
-            System.out.println("Sent data.");
+            server.close();
 
         } catch (IOException e) {
 
@@ -86,18 +140,9 @@ public class FolderGiver {
 
     }
 
-    private Object deserialize(byte[] ary) throws IOException, ClassNotFoundException {
-
-        ByteArrayInputStream in = new ByteArrayInputStream(ary);
-        ObjectInputStream objstrm = new ObjectInputStream(in);
-
-        return objstrm.readObject();
-
-    }
-
     public static void main(String[] args) {
 
-        new FolderGiver(8000, "H:\\testFolder");
+        new FolderGiver();
 
     }
 
