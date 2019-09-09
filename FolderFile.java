@@ -1,25 +1,18 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
 public class FolderFile extends File {
 
-    public String contents = "";
+    public byte[] contents;
 
     public FolderFile(String path) {
 
         super(path);
 
+        contents = new byte[(int) this.length()];
         try {
 
-            BufferedReader in = new BufferedReader(new FileReader(this));
-            String line = "";
-            while ((line = in.readLine()) != null) {
-
-                contents += line;
-
-            }
+            FileInputStream in = new FileInputStream(this);
+            in.read(contents);
             in.close();
 
         } catch (IOException e) {
