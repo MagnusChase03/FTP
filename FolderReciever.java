@@ -2,10 +2,12 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -34,6 +36,8 @@ public class FolderReciever extends JFrame {
 	private JButton recieve = new JButton("RECIEVE");
 	
 	private JComboBox<RecieveSession> saves = new JComboBox<RecieveSession>();
+	
+	private JButton saveButton = new JButton("Save Set");
 	
 	/**
 	 * @param host
@@ -103,13 +107,51 @@ public class FolderReciever extends JFrame {
 		});
 		
 		add(saves);
+		
+		saveButton.setBounds(310, 480, 100, 75);
+		saveButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e){
+				try {
+					saveIn();
+					readInSaves();
+				}
+				catch (IOException | NumberFormatException e1) { }
+			}
+		});
+		
+		add(saveButton);
 
+	}
+	
+	private void saveIn() throws NumberFormatException, IOException {
+		
+		BufferedReader br = new BufferedReader(new FileReader(saveFile));
+		String contents = "";
+		String line = "";
+		while((line = br.readLine()) != null) {
+			
+			contents += line + "\n";
+			
+		}
+		
+		contents += inIpAddress.getText()+" "+inPort.getText()+" "+inPath.getText();
+		
+		br.close();
+		
+		BufferedWriter bw = new BufferedWriter(new FileWriter(saveFile));
+		bw.write(contents);
+		bw.close();
+		
+		
 	}
 	
 	private void readInSaves() throws IOException {
 		
 		BufferedReader br = new BufferedReader(new FileReader(saveFile));
 		String line = "";
+		saves.removeAllItems();
 		while((line = br.readLine()) != null) {
 			
 			String[] session = line.split(" ");
@@ -156,7 +198,7 @@ public class FolderReciever extends JFrame {
         }
         
         Folder folder = (Folder) deserialize(inBytes);
-		Files.createDirectories(Paths.get(originalPath));
+        Files.createDirectories(Paths.get(originalPath + folder.getAbsolutePath().substring(folder.getAbsolutePath().indexOf("\\"))));
         process(folder, originalPath);
             
         in.close();
@@ -169,7 +211,7 @@ public class FolderReciever extends JFrame {
 		for(File f : fol.files) {
 			
 			String filepath = originalPath + f.getAbsolutePath().substring(f.getAbsolutePath().indexOf("\\"));
-			System.out.println(filepath);
+			//System.out.println(filepath);
 			if(f.getName().indexOf(".") < 0) {
 				
 				Files.createDirectories(Paths.get(filepath));
@@ -177,6 +219,8 @@ public class FolderReciever extends JFrame {
 				
 			} else if(f instanceof FolderFile){
 				
+				System.out.println(filepath);
+				new File(filepath).createNewFile();
 				FileOutputStream fos = new FileOutputStream(new File(filepath));
 				fos.write(((FolderFile)f).contents);
 		      		        
